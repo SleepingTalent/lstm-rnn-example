@@ -30,11 +30,11 @@ public class StockPricePrediction {
         int batchSize = 64; // mini-batch size
         int exampleLength = 22; // time series length, assume 22 working days per month
         double splitRatio = 0.9; // 90% for training, 10% for testing
-        int epochs = 2; // training epochs
+        int epochs = 100; // training epochs
 
         log.info("Create dataSet iterator...");
-        //PriceCategory category = PriceCategory.CLOSE; // CLOSE: predict close price
-        PriceCategory category = PriceCategory.ALL; // ALL: predict all features
+        PriceCategory category = PriceCategory.CLOSE; // CLOSE: predict close price
+        //PriceCategory category = PriceCategory.ALL; // ALL: predict all features
         StockDataSetIterator iterator = new StockDataSetIterator(file, symbol, batchSize, exampleLength, splitRatio, category);
 
         log.info("Load test dataset...");
@@ -55,7 +55,7 @@ public class StockPricePrediction {
         }
 
         log.info("Saving model...");
-        File locationToSave = new File("src/main/resources/StockPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
+        File locationToSave = new File("C:/Users/jaybo_000/gitHub-downloads/lstm-rnn-example/lstm-rnn-example-parent/lstm-rnn-example/src/main/resources/StockPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
         // saveUpdater: i.e., the state for Momentum, RMSProp, Adagrad etc.
         // Save this if you want to train your network more in the future
         ModelSerializer.writeModel(net, locationToSave, true);
@@ -74,8 +74,8 @@ public class StockPricePrediction {
                 actuals[i] = test.get(i).getValue();
             }
             log.info("Print out Predictions and Actual Values...");
-            log.info("Predict\tActual");
-            for (int i = 0; i < predicts.length; i++) log.info(predicts[i] + "\t" + actuals[i]);
+            log.info("Predict\t\t\t\t\t\t\t\t\t\t\t\t\tActual");
+            for (int i = 0; i < predicts.length; i++) log.info(predicts[i] + "\t\t" + actuals[i]);
             log.info("Plot...");
             plotAll(predicts, actuals);
         } else {
@@ -88,8 +88,10 @@ public class StockPricePrediction {
                 actuals[i] = test.get(i).getValue().getDouble(0);
             }
             log.info("Print out Predictions and Actual Values...");
-            log.info("Predict,Actual");
-            for (int i = 0; i < predicts.length; i++) log.info(predicts[i] + "," + actuals[i]);
+            log.info("Predict\t\t\t\t\t\t\tActual");
+            for (int i = 0; i < predicts.length; i++){
+                log.info(predicts[i] + "\t\t" + actuals[i]);
+            }
             log.info("Plot...");
             PlotUtil.plot(predicts, actuals, String.valueOf(category));
         }
