@@ -55,7 +55,8 @@ public class StockPricePrediction {
         }
 
         log.info("Saving model...");
-        File locationToSave = new File("C:/Users/jaybo_000/gitHub-downloads/lstm-rnn-example/lstm-rnn-example-parent/lstm-rnn-example/src/main/resources/StockPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
+        String outputLocation = new ClassPathResource("stockPrediction").getFile().getAbsolutePath();
+        File locationToSave = new File(outputLocation+"/StockPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
         // saveUpdater: i.e., the state for Momentum, RMSProp, Adagrad etc.
         // Save this if you want to train your network more in the future
         ModelSerializer.writeModel(net, locationToSave, true);
