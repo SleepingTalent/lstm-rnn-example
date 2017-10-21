@@ -21,11 +21,82 @@
         <slf4j.version>1.7.21</slf4j.version>
         <opencsv.version>3.9</opencsv.version>
         <jfreechart.version>1.0.19</jfreechart.version>
-        <spark.version>2.1.0</spark.version>
+        <spark.version>2.2.0</spark.version>
+        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <jackson.version>2.6.6</jackson.version>
+        <shadedClassifier>bin</shadedClassifier>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>${shadedClassifier}</shadedClassifierName>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>org/datanucleus/**</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>commons-compiler</artifactId>
+                <version>2.7.8</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-scala_2.11</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.nd4j</groupId>
                 <artifactId>nd4j-native-platform</artifactId>
@@ -125,9 +196,9 @@
         </dependency>
         <!-- SLF4J Dependency -->
         <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>slf4j-simple</artifactId>-->
-            <!--<version>${slf4j.version}</version>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>slf4j-simple</artifactId>-->
+        <!--<version>${slf4j.version}</version>-->
         <!--</dependency>-->
         <!-- JFreeChart Dependency -->
         <dependency>
@@ -137,9 +208,9 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.jfree</groupId>-->
-            <!--<artifactId>jcommon</artifactId>-->
-            <!--<version>1.0.24</version>-->
+        <!--<groupId>org.jfree</groupId>-->
+        <!--<artifactId>jcommon</artifactId>-->
+        <!--<version>1.0.24</version>-->
         <!--</dependency>-->
 
         <dependency>
@@ -167,7 +238,7 @@
         </dependency>
 
         <!-- Spark Dependencies -->
-        <!--<dependency>
+        <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.11</artifactId>
             <version>${spark.version}</version>
@@ -181,7 +252,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>
             <version>${spark.version}</version>
-        </dependency>-->
+        </dependency>
 
 
     </dependencies>
