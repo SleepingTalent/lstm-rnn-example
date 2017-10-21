@@ -32,9 +32,9 @@ public class ForexDataSetIterator implements DataSetIterator {
     private List<ForexData> train;
     private List<Pair<INDArray, INDArray>> test;
 
-    public ForexDataSetIterator(String filename, String symbol, int miniBatchSize, int exampleLength, double splitRatio,
+    public ForexDataSetIterator(String filename, String instrument, int miniBatchSize, int exampleLength, double splitRatio,
                                 PriceCategory category) {
-        List<ForexData> forexDataList = readStockDataFromFile(filename, symbol);
+        List<ForexData> forexDataList = readStockDataFromFile(filename, instrument);
         this.miniBatchSize = miniBatchSize;
         this.exampleLength = exampleLength;
         this.category = category;
@@ -80,13 +80,11 @@ public class ForexDataSetIterator implements DataSetIterator {
                 input.putScalar(new int[] {index, 1, c}, (curData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
                 input.putScalar(new int[] {index, 2, c}, (curData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
                 input.putScalar(new int[] {index, 3, c}, (curData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-                input.putScalar(new int[] {index, 4, c}, (curData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
                 if (category.equals(PriceCategory.ALL)) {
                     label.putScalar(new int[] {index, 0, c}, (nextData.getOpen() - minNum[1]) / (maxNum[1] - minNum[1]));
                     label.putScalar(new int[] {index, 1, c}, (nextData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
                     label.putScalar(new int[] {index, 2, c}, (nextData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
                     label.putScalar(new int[] {index, 3, c}, (nextData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-                    label.putScalar(new int[] {index, 4, c}, (nextData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
                 } else {
                     label.putScalar(new int[]{index, 0, c}, feedLabel(nextData));
                 }
@@ -104,7 +102,6 @@ public class ForexDataSetIterator implements DataSetIterator {
             case CLOSE: value = (data.getClose() - minNum[1]) / (maxNum[1] - minNum[1]); break;
             case LOW: value = (data.getLow() - minNum[2]) / (maxNum[2] - minNum[2]); break;
             case HIGH: value = (data.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]); break;
-            case VOLUME: value = (data.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]); break;
             default: throw new NoSuchElementException();
         }
         return value;
@@ -158,27 +155,34 @@ public class ForexDataSetIterator implements DataSetIterator {
     public DataSet next() { return next(miniBatchSize); }
     
     private List<Pair<INDArray, INDArray>> generateTestDataSet (List<ForexData> forexDataList) {
-    	int window = exampleLength + 1;
+
+        int window = exampleLength + 1;
+
     	List<Pair<INDArray, INDArray>> test = new ArrayList<>();
+
     	for (int i = 0; i < forexDataList.size() - window; i++) {
+
     		INDArray input = Nd4j.create(new int[] {exampleLength, VECTOR_SIZE}, 'f');
+
     		for (int j = i; j < i + exampleLength; j++) {
-    			ForexData stock = forexDataList.get(j);
-    			input.putScalar(new int[] {j - i, 0}, (stock.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
-    			input.putScalar(new int[] {j - i, 1}, (stock.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
-    			input.putScalar(new int[] {j - i, 2}, (stock.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
-    			input.putScalar(new int[] {j - i, 3}, (stock.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-    			input.putScalar(new int[] {j - i, 4}, (stock.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
+
+                ForexData forexData = forexDataList.get(j);
+
+    			input.putScalar(new int[] {j - i, 0}, (forexData.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
+    			input.putScalar(new int[] {j - i, 1}, (forexData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+    			input.putScalar(new int[] {j - i, 2}, (forexData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
+    			input.putScalar(new int[] {j - i, 3}, (forexData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
     		}
+
             ForexData stock = forexDataList.get(i + exampleLength);
             INDArray label;
+
             if (category.equals(PriceCategory.ALL)) {
                 label = Nd4j.create(new int[]{VECTOR_SIZE}, 'f');
                 label.putScalar(new int[] {0}, stock.getOpen());
                 label.putScalar(new int[] {1}, stock.getClose());
                 label.putScalar(new int[] {2}, stock.getLow());
                 label.putScalar(new int[] {3}, stock.getHigh());
-                label.putScalar(new int[] {4}, stock.getVolume());
             } else {
                 label = Nd4j.create(new int[] {1}, 'f');
                 switch (category) {
@@ -186,7 +190,6 @@ public class ForexDataSetIterator implements DataSetIterator {
                     case CLOSE: label.putScalar(new int[] {0}, stock.getClose()); break;
                     case LOW: label.putScalar(new int[] {0}, stock.getLow()); break;
                     case HIGH: label.putScalar(new int[] {0}, stock.getHigh()); break;
-                    case VOLUME: label.putScalar(new int[] {0}, stock.getVolume()); break;
                     default: throw new NoSuchElementException();
                 }
             }
@@ -197,6 +200,7 @@ public class ForexDataSetIterator implements DataSetIterator {
 
 	private List<ForexData> readStockDataFromFile (String filename, String symbol) {
         List<ForexData> forexDataList = new ArrayList<>();
+
         try {
             List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
             for (int i = 0; i < maxNum.length; i++) {
@@ -204,14 +208,25 @@ public class ForexDataSetIterator implements DataSetIterator {
                 minNum[i] = Double.MAX_VALUE;
             }
             for (String[] arr : list) {
-                if (!arr[1].equals(symbol)) continue;
-                double[] nums = new double[VECTOR_SIZE];
-                for (int i = 0; i < arr.length - 2; i++) {
-                    nums[i] = Double.valueOf(arr[i + 2]);
-                    if (nums[i] > maxNum[i]) maxNum[i] = nums[i];
-                    if (nums[i] < minNum[i]) minNum[i] = nums[i];
+
+                if (!arr[0].equals(symbol)){
+                    continue;
                 }
-                forexDataList.add(new ForexData(arr[0], arr[1], nums[0], nums[1], nums[2], nums[3], nums[4]));
+
+                double[] nums = new double[VECTOR_SIZE];
+
+                for (int i = 0; i < arr.length - 2; i++) {
+
+                    nums[i] = Double.valueOf(arr[i + 1]);
+                    if (nums[i] > maxNum[i]){
+                        maxNum[i] = nums[i];
+                    }
+                    if (nums[i] < minNum[i]){
+                        minNum[i] = nums[i];
+                    }
+                }
+
+                forexDataList.add(new ForexData(arr[0], arr[4], nums[0], nums[1], nums[2], nums[3]));
             }
         } catch (IOException e) {
             e.printStackTrace();
