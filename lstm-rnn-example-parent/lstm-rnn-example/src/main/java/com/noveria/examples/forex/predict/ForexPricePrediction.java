@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -88,7 +89,7 @@ public class ForexPricePrediction {
             log.info("Predict\t\t\t\t\t\t\t\t\t\t\t\t\tActual");
 
             for (int i = 0; i < predicts.length; i++) {
-                log.info(predicts[i] + "\t\t" + actuals[i]);
+                log.info(predicts[i] + "\t\t" + actuals[i] + "\t\t" + (predicts[i].sub(actuals[i])));
             }
 
             log.info("Plot...");
@@ -109,7 +110,10 @@ public class ForexPricePrediction {
             log.info("Predict\t\t\t\t\t\t\tActual");
 
             for (int i = 0; i < predicts.length; i++){
-                log.info(predicts[i] + "\t\t" + actuals[i]);
+                double pipDifference = predicts[i]-actuals[i];
+
+                log.info(predicts[i] + "\t\t" + actuals[i] + "\t\t"+ (
+                        new DecimalFormat("#0.0000").format(pipDifference)));
             }
 
             //log.info("Plot...");
