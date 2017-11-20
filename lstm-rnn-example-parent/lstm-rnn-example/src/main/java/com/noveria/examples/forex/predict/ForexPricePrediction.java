@@ -5,6 +5,7 @@ import com.noveria.examples.forex.representation.ForexDataSetIterator;
 import com.noveria.examples.forex.utils.PlotUtil;
 import com.noveria.examples.stock.model.RecurrentNets;
 import org.apache.commons.lang3.tuple.Pair;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -29,10 +30,10 @@ public class ForexPricePrediction {
         String file = new ClassPathResource("GBP_USD_testData.csv").getFile().getAbsolutePath();
 
         String instrument = "GBP_USD"; // stock name
-        int batchSize = 64; // mini-batch size
+        int batchSize = 128; // mini-batch size
         int exampleLength = 22; // time series length, assume 22 working days per month
-        double splitRatio = 0.9; // 90% for training, 10% for testing
-        int epochs = 100; // training epochs
+        double splitRatio = 0.95; // 90% for training, 10% for testing
+        int epochs = 20; // training epochs
 
         log.info("Create dataSet iterator...");
         PriceCategory category = PriceCategory.CLOSE; // CLOSE: predict close price
@@ -59,16 +60,16 @@ public class ForexPricePrediction {
             net.rnnClearPreviousState(); // clear previous state
         }
 
-        log.info("Saving model...");
-        String outputLocation = new ClassPathResource("forexPrediction").getFile().getAbsolutePath();
-        File locationToSave = new File(outputLocation+"/ForexPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
+        //log.info("Saving model...");
+        //String outputLocation = new ClassPathResource("forexPrediction").getFile().getAbsolutePath();
+        //File locationToSave = new File(outputLocation+"/ForexPriceLSTM_".concat(String.valueOf(category)).concat(".zip"));
 
         // saveUpdater: i.e., the state for Momentum, RMSProp, Adagrad etc.
         // Save this if you want to train your network more in the future
-        ModelSerializer.writeModel(net, locationToSave, true);
+        //ModelSerializer.writeModel(net, locationToSave, true);
 
-        log.info("load model...");
-        net = ModelSerializer.restoreMultiLayerNetwork(locationToSave);
+        //log.info("load model...");
+        //net = ModelSerializer.restoreMultiLayerNetwork(locationToSave);
 
         log.info("Testing...");
         if (category.equals(PriceCategory.ALL)) {
@@ -90,6 +91,12 @@ public class ForexPricePrediction {
 
             for (int i = 0; i < predicts.length; i++) {
                 log.info(predicts[i] + "\t\t" + actuals[i] + "\t\t" + (predicts[i].sub(actuals[i])));
+
+                Evaluation evaluation = new Evaluation();
+                //INDArray output = net.output(dataSet.getFeatureMatrix());
+                //INDArray labels = dataSet.getLabels();
+                evaluation.eval(actuals[i], predicts[i]);
+                System.out.println(evaluation.stats());
             }
 
             log.info("Plot...");
@@ -113,13 +120,21 @@ public class ForexPricePrediction {
                 double pipDifference = predicts[i]-actuals[i];
 
                 log.info(predicts[i] + "\t\t" + actuals[i] + "\t\t"+ (
-                        new DecimalFormat("#0.0000").format(pipDifference)));
+                        new DecimalFormat("#0.0000").format(pipDifference))
+                        +"("+ new DecimalFormat("#0.00").format(pipDifference/0.0001)+")");
             }
 
-            //log.info("Plot...");
-            //PlotUtil.plot(predicts, actuals, String.valueOf(category));
+            //Evaluation evaluation = new Evaluation();
+            //INDArray output = net.output(dataSet.getFeatureMatrix());
+            //INDArray labels = dataSet.getLabels();
+            //evaluation.eval(Nd4j.create(actuals), Nd4j.create(predicts));
+            //System.out.println(evaluation.stats());
+
+            log.info("Plot...");
+            PlotUtil.plot(predicts, actuals, String.valueOf(category));
         }
-        log.info("Done...");
+
+
     }
 
     // plot all predictions

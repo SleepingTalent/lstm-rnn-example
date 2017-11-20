@@ -1,4 +1,4 @@
-package com.noveria.examples.forex.utils;
+package com.noveria.examples.forex.v2.util;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -20,8 +20,8 @@ public class PlotUtil {
 			index[i] = i;
 		}
 
-		double min = minValue(predicts, actuals);
-		double max = maxValue(predicts, actuals);
+		int min = minValue(predicts, actuals);
+		int max = maxValue(predicts, actuals);
 
 		final XYSeriesCollection dataSet = new XYSeriesCollection();
 
@@ -72,38 +72,26 @@ public class PlotUtil {
 		dataSet.addSeries(s);
 	}
 
-	private static double minValue (double[] predicts, double[] actuals) {
-		double min = Double.MAX_VALUE;
+	private static int minValue (double[] predicts, double[] actuals) {
+		int min = Integer.MAX_VALUE;
 
 		for (int i = 0; i < predicts.length; i++) {
-			if (min > predicts[i]) {
-				min = predicts[i];
-			}
-
-			if (min > actuals[i]){
-				min = actuals[i];
-			}
+			if (min > (int) predicts[i]) min = (int) predicts[i];
+			if (min > (int) actuals[i]) min = (int) actuals[i];
 		}
 
-		//return (int) (min * 0.98);
-		return min;
+		return (int) (min * 0.98);
 	}
 
-	private static double maxValue (double[] predicts, double[] actuals) {
-		double max = Double.MIN_VALUE;
+	private static int maxValue (double[] predicts, double[] actuals) {
+		int max = Integer.MIN_VALUE;
 
 		for (int i = 0; i < predicts.length; i++) {
-			if (max < predicts[i]) {
-				max = predicts[i];
-			}
-
-			if (max < actuals[i]) {
-				max = actuals[i];
-			}
+			if (max < (int) predicts[i]) max = (int) predicts[i];
+			if (max < (int) actuals[i]) max = (int) actuals[i];
 		}
 
-		//return (int) (max * 1.02);
-		return max;
+		return (int) (max * 1.02);
 	}
 
 }

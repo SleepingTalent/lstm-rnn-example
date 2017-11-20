@@ -1,4 +1,4 @@
-package com.noveria.examples.forex.representation;
+package com.noveria.examples.forex.v2.model;
 
 public class ForexData {
     private String date; // date
