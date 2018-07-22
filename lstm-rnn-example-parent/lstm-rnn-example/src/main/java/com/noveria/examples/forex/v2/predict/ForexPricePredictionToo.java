@@ -25,34 +25,38 @@ public class ForexPricePredictionToo {
     private static final Logger log = LoggerFactory.getLogger(ForexPricePredictionToo.class);
 
     public static void main(String[] args) throws IOException {
-        String file = new ClassPathResource("GBP_USD_testData.csv").getFile().getAbsolutePath();
 
-        String instrument = "GBP_USD"; // stock name
-        int batchSize = 128; // mini-batch size
-        int exampleLength = 22; // time series length, assume 22 working days per month
-        double splitRatio = 0.95; // 90% for training, 10% for testing
-        int epochs = 20; // training epochs
+        ForexDataSetProcessor dataSetProcessor = new ForexDataSetProcessor();
+        dataSetProcessor.processDataSet("GBP_USD_testData.csv");
 
-        log.info("Create dataSet iterator...");
-        ForexDataSetIterator iterator = new ForexDataSetIterator(file, instrument,
-                batchSize, exampleLength, splitRatio);
-
-        log.info("Iterator Labels:{}",iterator.getLabels());
-
-        //log.info("Load test dataset...");
-        //List<Pair<INDArray, INDArray>> test = iterator.getTestDataSet();
-
-        log.info("Build lstm networks...");
-        MultiLayerNetwork net = NeuralNetwork.buildLstmNetworks(iterator.inputColumns(), iterator.totalOutcomes());
-
-        //net.init();
-
-        log.info("Fit network...");
-        net.fit(iterator);
-
-        log.info("Evaluate network...");
-        Evaluation evaluation = net.evaluate(iterator);
-        System.out.println(evaluation.stats());
+//        String file = new ClassPathResource("GBP_USD_testData.csv").getFile().getAbsolutePath();
+//
+//        String instrument = "GBP_USD"; // stock name
+//        int batchSize = 128; // mini-batch size
+//        int exampleLength = 22; // time series length, assume 22 working days per month
+//        double splitRatio = 0.95; // 90% for training, 10% for testing
+//        int epochs = 20; // training epochs
+//
+//        log.info("Create dataSet iterator...");
+//        ForexDataSetIterator iterator = new ForexDataSetIterator(file, instrument,
+//                batchSize, exampleLength, splitRatio);
+//
+//        log.info("Iterator Labels:{}",iterator.getLabels());
+//
+//        //log.info("Load test dataset...");
+//        //List<Pair<INDArray, INDArray>> test = iterator.getTestDataSet();
+//
+//        log.info("Build lstm networks...");
+//        MultiLayerNetwork net = NeuralNetwork.buildLstmNetworks(iterator.inputColumns(), iterator.totalOutcomes());
+//
+//        //net.init();
+//
+//        log.info("Fit network...");
+//        net.fit(iterator);
+//
+//        log.info("Evaluate network...");
+//        Evaluation evaluation = net.evaluate(iterator);
+//        System.out.println(evaluation.stats());
 
 //        log.info("Training...");
 //        for (int i = 0; i < epochs; i++) {

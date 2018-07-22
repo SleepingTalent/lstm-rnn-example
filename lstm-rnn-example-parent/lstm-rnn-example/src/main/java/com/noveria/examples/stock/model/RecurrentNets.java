@@ -28,13 +28,9 @@ public class RecurrentNets {
     public static MultiLayerNetwork buildLstmNetworks(int nIn, int nOut) {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(seed)
-                .iterations(iterations)
-                .learningRate(learningRate)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .weightInit(WeightInit.XAVIER)
                 .updater(Updater.RMSPROP)
-                .rmsDecay(0.95)
-                .regularization(true)
                 .l2(1e-4)
                 .list()
                 .layer(0, new GravesLSTM.Builder()
